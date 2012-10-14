@@ -38,7 +38,7 @@ public class MonsterMapActivity extends MapActivity {
 		mapController.setZoom(18); // Zoom 1 is world view
 
 		//Create player and center the map on the player
-		Player player = new Player("CameronV", "I'm cool", MY_LATITUDE, MY_LONGITUDE,this.getResources().getDrawable(R.drawable.t_m_n_squirtle));
+		Player player = new Player("CameronVoe", "I'm cool", MY_LATITUDE, MY_LONGITUDE,this.getResources().getDrawable(R.drawable.t_m_n_squirtle));
 		GeoPoint myLocation = new GeoPoint(MY_LATITUDE,MY_LONGITUDE);
 		mapController.animateTo(myLocation);
 		
