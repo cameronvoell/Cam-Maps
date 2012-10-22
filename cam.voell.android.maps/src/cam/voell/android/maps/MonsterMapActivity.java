@@ -38,8 +38,8 @@ public class MonsterMapActivity extends MapActivity {
 		mapController.setZoom(18); // Zoom 1 is world view
 
 		//Create player and center the map on the player
-		Player player = new Player("Cameron", "I'm cool", MY_LATITUDE, MY_LONGITUDE,this.getResources().getDrawable(R.drawable.t_m_n_squirtle));
-		GeoPoint myLocation = new GeoPoint(MY_LATITUDE,MY_LONGITUDE);
+		Player player = new Player("Cameron", "I'm cool", MY_LATITUDE,MY_LONGITUDE,this.getResources().getDrawable(R.drawable.t_m_n_squirtle));
+		GeoPoint myLocation = new GeoPoint(MY_LATITUDE, MY_LONGITUDE);
 		mapController.animateTo(myLocation);
 		
 		List mapOverlays = mapView.getOverlays();
@@ -50,7 +50,7 @@ public class MonsterMapActivity extends MapActivity {
 		MonsterItemizedOverlay userPicOverlay = new MonsterItemizedOverlay(userPic, this);
 		OverlayItem overlayItem = new OverlayItem(myLocation, "", "/me waves");
 		userPicOverlay.addOverlay(overlayItem);
-		mapOverlays.add(userPicOverlay);
+		mapOverlays.add(0,userPicOverlay);
 
 		Drawable partyPic = this.getResources().getDrawable(R.drawable.pokeball);
 		MonsterItemizedOverlay partyPicOverlay = new MonsterItemizedOverlay(partyPic, this);
@@ -65,7 +65,8 @@ public class MonsterMapActivity extends MapActivity {
 		//This code updates the location to my location ( ideally have a button for this)
 		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-		    0, new GeoUpdateHandler(mapController));
+		    0, new GeoUpdateHandler(mapController,player,mapOverlays,userPicOverlay));
+		
 	}
 	
 	private List<Monster> getMonstersNear(int latitude, int longitude){
@@ -75,4 +76,5 @@ public class MonsterMapActivity extends MapActivity {
 	    parties.add(new Monster("Party 3",(int) (37.7647 * 1E6), (int) (-122.468 * 1E6)));
 	    return parties;
 	}
+	
 }

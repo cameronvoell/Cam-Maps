@@ -23,6 +23,15 @@ public class MonsterItemizedOverlay extends ItemizedOverlay {
 		mOverlays.add(overlay);
 		populate();
 	}
+	public void addOverlay(int i, OverlayItem overlay){
+		mOverlays.add(i,overlay);
+		populate();
+	}
+	public void removeOverlay(int i)
+	{
+		mOverlays.remove(i);
+		populate();
+	}
 
 	@Override
 	protected OverlayItem createItem(int i) {
