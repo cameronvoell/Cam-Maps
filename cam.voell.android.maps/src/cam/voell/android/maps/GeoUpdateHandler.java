@@ -29,15 +29,19 @@ public class GeoUpdateHandler implements LocationListener {
 	@Override
 	public void onLocationChanged(Location location) {
 		latitude = (int) (location.getLatitude() * 1E6);
-		myPlayer.setLatitude(latitude);
 		longitude = (int) (location.getLongitude() * 1E6);
+		float results[] = {0,0,0};
+		Location.distanceBetween(myPlayer.getLatitude(),myPlayer.getLongitude(), latitude, longitude, results);
+		myPlayer.setLatitude(latitude);
 		myPlayer.setLongitude(longitude);
 		GeoPoint point = new GeoPoint(latitude, longitude);
-		
+			
 		myUserPicOverlay.removeOverlay(0);
-		myUserPicOverlay.addOverlay(new OverlayItem(point, "", "I'm at" + latitude + " , " + longitude));
+		myUserPicOverlay.addOverlay(new OverlayItem(point, "", "I moved by " + results[0] + " meters."));
 		myMapOverlays.set(0,myUserPicOverlay);
 		mapController.animateTo(point);
+		
+		
 		//display the user pic at the new location and show the parties over there
 		
 	}

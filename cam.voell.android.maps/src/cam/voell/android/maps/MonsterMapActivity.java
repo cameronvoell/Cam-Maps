@@ -65,7 +65,7 @@ public class MonsterMapActivity extends MapActivity {
 		//This code updates the location to my location ( ideally have a button for this)
 		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-		    0, new GeoUpdateHandler(mapController,player,mapOverlays,userPicOverlay));
+		    10, new GeoUpdateHandler(mapController,player,mapOverlays,userPicOverlay));
 		
 	}
 	
