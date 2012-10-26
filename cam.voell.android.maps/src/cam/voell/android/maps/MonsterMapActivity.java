@@ -30,51 +30,60 @@ public class MonsterMapActivity extends MapActivity {
 		super.onCreate(bundle);
 		setContentView(R.layout.mapview);
 
-		// create a map view
+		//1) Create a map view
 		MapView mapView = (MapView) findViewById(R.id.mapview);
 		mapView.setBuiltInZoomControls(true);
 		mapView.setStreetView(true);
 		MapController mapController = mapView.getController();
 		mapController.setZoom(18); // Zoom 1 is world view
 
-		//Create player and center the map on the player
+		//2) Create player and center the map on the player
 		Player player = new Player("Cameron", "I'm cool", MY_LATITUDE,MY_LONGITUDE,this.getResources().getDrawable(R.drawable.t_m_n_squirtle));
 		GeoPoint myLocation = new GeoPoint(MY_LATITUDE, MY_LONGITUDE);
 		mapController.animateTo(myLocation);
 		
+		//3) Create list of monsters
+		ArrayList<Monster> mapMonsters = initiateMonsters();
+		
+		//4) This list will be modified to control what overlays are displayed on the map
 		List mapOverlays = mapView.getOverlays();
 		
-
-		//Needs to be called on the update handler method
-		Drawable userPic = this.getResources().getDrawable(R.drawable.t_m_n_squirtle);
-		MonsterItemizedOverlay userPicOverlay = new MonsterItemizedOverlay(userPic, this);
-		OverlayItem overlayItem = new OverlayItem(myLocation, "", "/me waves");
+		//5) Add Player on to the map
+		//***Player Location will be updated via the GeoUpdateHandler method
+		MonsterItemizedOverlay userPicOverlay = new MonsterItemizedOverlay(player.getMyPic(), this);
+		OverlayItem overlayItem = new OverlayItem(myLocation, "", "My name is Cameron");
 		userPicOverlay.addOverlay(overlayItem);
 		mapOverlays.add(0,userPicOverlay);
 
-		Drawable partyPic = this.getResources().getDrawable(R.drawable.pokeball);
-		MonsterItemizedOverlay partyPicOverlay = new MonsterItemizedOverlay(partyPic, this);
-
-		for (Monster monster: getMonstersNear(MY_LATITUDE, MY_LONGITUDE)){
+		//6) Add Monsters to the map
+		Drawable genericMonsterPic = this.getResources().getDrawable(R.drawable.pokeball);
+		MonsterItemizedOverlay partyPicOverlay = new MonsterItemizedOverlay(genericMonsterPic, this);
+		for (Monster monster: mapMonsters){
 			GeoPoint monster1 = new GeoPoint(monster.getLatitude(), monster.getLongitude());
 			OverlayItem partyOverlayItem = new OverlayItem(monster1, "", monster.getDescription());
 			partyPicOverlay.addOverlay(partyOverlayItem);
 			mapOverlays.add(partyPicOverlay);
 		}
 		
-		//This code updates the location to my location ( ideally have a button for this)
+		//****************************************************************************
+		//This is the most important code in the MonsterMapActivity. This code creates a 
+		//Location manager that will listen for any location changes for more than 10 meters
+		//and will then call the GeoUpdateHandler onLocationChanged method.
+		//Any changes to the player, monster, or mapView that need to occur when a location
+		//is changed, need to be called from this onLocationChanged method.
 		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-		    10, new GeoUpdateHandler(mapController,player,mapOverlays,userPicOverlay));
+		    0, new GeoUpdateHandler(mapController,player,mapMonsters,mapOverlays,userPicOverlay));
 		
 	}
 	
-	private List<Monster> getMonstersNear(int latitude, int longitude){
-	    List parties = new ArrayList();
-	    parties.add(new Monster("BeLEUVENissen TropicalnOld Marketn20.30 - 21.30 Cookies & Creamn22.00 - 23.30 Vaya Con Dios",(int) (50.878 * 1E6), (int) (4.7 * 1E6)));
-	    parties.add(new Monster("Party 2",(int) (50.875 * 1E6), (int) (4.705 * 1E6)));
-	    parties.add(new Monster("Party 3",(int) (37.7647 * 1E6), (int) (-122.468 * 1E6)));
-	    return parties;
+	//This method initiated the monsters on the map.
+	private ArrayList<Monster> initiateMonsters(){
+	    ArrayList monsters = new ArrayList();
+	    monsters.add(new Monster("Outside Lands Monster","You are near your home",(int) (37.7647* 1E6), (int) (-122.468* 1E6)));
+	    monsters.add(new Monster("CoitCreature", "You are near Megans",(int) (37.800027 * 1E6), (int) (-122.405537 * 1E6)));
+	    monsters.add(new Monster("YelpMonster", "You are near Yelp",(int) (37.785962* 1E6), (int) (-122.402576* 1E6)));  
+	    return monsters;
 	}
 	
 }

@@ -2,13 +2,15 @@ package cam.voell.android.maps;
 
 public class Monster {
 
+		private String name;
 		private String description;
 		private int latitude;
 		private int longitude;
 
 		public Monster(){}
-		public Monster(String description, int latitude, int longitude) {
+		public Monster(String name, String description, int latitude, int longitude) {
 			super();
+			this.setName(name);
 			this.description = description;
 			this.latitude = latitude;
 			this.longitude = longitude;
@@ -31,6 +33,12 @@ public class Monster {
 		}
 		public void setLongitude(int longitude) {
 			this.longitude = longitude;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
 		}
 
 	}
