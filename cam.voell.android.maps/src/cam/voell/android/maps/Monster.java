@@ -6,6 +6,7 @@ public class Monster {
 		private String description;
 		private int latitude;
 		private int longitude;
+		private boolean isFound;
 
 		public Monster(){}
 		public Monster(String name, String description, int latitude, int longitude) {
@@ -14,6 +15,22 @@ public class Monster {
 			this.description = description;
 			this.latitude = latitude;
 			this.longitude = longitude;
+			this.isFound = false;
+		}
+		
+		public String toString()
+		{
+			String foundStatus = "0";
+			if(isFound)
+			{
+			foundStatus = "1";	
+			}
+			return foundStatus + "-" + name + ": " + description;
+		}
+		
+		public void setFound()
+		{
+			isFound=true;
 		}
 
 		public String getDescription() {

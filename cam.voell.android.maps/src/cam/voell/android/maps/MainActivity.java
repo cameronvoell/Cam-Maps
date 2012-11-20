@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.widget.TabHost;
 
 public class MainActivity extends TabActivity {
@@ -12,6 +13,7 @@ public class MainActivity extends TabActivity {
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
 
         TabHost tabHost = getTabHost();
 
