@@ -24,9 +24,9 @@ public class MainActivity extends TabActivity {
         
 
         // Do the same for the other tabs
-        Intent partyListIntent = new Intent().setClass(this, MonsterListActivity.class);
-        TabHost.TabSpec partyListSpec = tabHost.newTabSpec("monsterList").setIndicator("Monster List").setContent(partyListIntent);
-        tabHost.addTab(partyListSpec);
+        Intent monsterListIntent = new Intent().setClass(this, MonsterListActivity.class);
+        TabHost.TabSpec monsterListSpec = tabHost.newTabSpec("monsterList").setIndicator("Monster List").setContent(monsterListIntent);
+        tabHost.addTab(monsterListSpec);
 
         tabHost.setCurrentTab(2);
     }
