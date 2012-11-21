@@ -63,6 +63,28 @@ public class MonsterListActivity extends Activity
 	    	    				Integer.parseInt(c.getString(
 	    	    						c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_LONGITUDE)))
 	    		)); 
+	    c.moveToNext();
+	    monsters.add(new Monster(
+				c.getString(
+						c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME)),
+				c.getString(
+						c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_DESCRIPTION)),
+				Integer.parseInt(c.getString(
+						c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_LATITUDE))),
+				Integer.parseInt(c.getString(
+						c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_LONGITUDE)))
+	    		)); 
+	    c.moveToNext();
+	    monsters.add(new Monster(
+				c.getString(
+						c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME)),
+				c.getString(
+						c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_DESCRIPTION)),
+				Integer.parseInt(c.getString(
+						c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_LATITUDE))),
+				Integer.parseInt(c.getString(
+						c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_LONGITUDE)))
+	    		)); 
 	    return monsters;
 	}
 }

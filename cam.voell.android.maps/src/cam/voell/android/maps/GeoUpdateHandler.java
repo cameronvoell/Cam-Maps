@@ -7,6 +7,9 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapController;
 import com.google.android.maps.OverlayItem;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
@@ -22,12 +25,13 @@ public class GeoUpdateHandler implements LocationListener {
 	
 	private int newLatitude;
 	private int newLongitude;
+	private Context context;
 
-	public GeoUpdateHandler(MapController mapController, Player p, ArrayList monsters, List mapOverlays, MonsterItemizedOverlay userPicOverlay){
+	public GeoUpdateHandler(Context c, MapController mapController, Player p, ArrayList monsters, List mapOverlays, MonsterItemizedOverlay userPicOverlay){
 		this.mapController = mapController;
 		myUserPicOverlay = userPicOverlay;
 		myMapOverlays = mapOverlays;
-		
+		context = c;
 		player = p;
 		this.monsters = monsters;
 		
@@ -41,7 +45,31 @@ public class GeoUpdateHandler implements LocationListener {
 		player.setLongitude(newLongitude);
 		Monster closeBy = playerNearMonster();
 		float dist = player.distanceTo(closeBy.getLatitude(),closeBy.getLongitude());
-		String message = "You are " + String.valueOf(dist) + " meters away from "+ closeBy.getName();
+		String message;
+		if (dist < 300)
+		{
+			message = "You captured " + closeBy.getName() + "!";
+			MonsterReaderDbHelper mDbHelper = new MonsterReaderDbHelper(context);
+			SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+			// New value for one column
+			ContentValues values = new ContentValues();
+			values.put(MonsterReaderContract.MonsterEntry.COLUMN_NAME_CAUGHT, String.valueOf(closeBy.getNumCaught() + 1));
+
+			// Which row to update, based on the ID
+			String selection = MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME + " LIKE ?";
+			String[] selectionArgs = { closeBy.getName() };
+
+			int count = db.update(
+			    MonsterReaderContract.MonsterEntry.TABLE_NAME,
+			    values,
+			    selection,
+			    selectionArgs);
+		}
+		else
+		{
+			message = "You are " + String.valueOf(dist) + " meters away from "+ closeBy.getName();
+		} 
 		GeoPoint point = new GeoPoint(newLatitude, newLongitude);
 			
 		myUserPicOverlay.removeOverlay(0);
@@ -55,14 +83,17 @@ public class GeoUpdateHandler implements LocationListener {
 	private Monster playerNearMonster()
 	{
 		boolean foundAMonster = false;
+		float minDist = 99999999;
+		Monster close = monsters.get(0);
 		for (Monster m: monsters)
 		{
 			float dist = player.distanceTo(m.getLatitude(),m.getLongitude());
-			if (dist < 300)
+			if (dist < minDist)
 			{
-				return m;
-				
+				minDist = dist;
+				close = m;
 			}
+			return close;
 		}
 		float sample = player.distanceTo(monsters.get(2).getLatitude(), monsters.get(2).getLongitude());
 		return new Monster("Invisible", String.valueOf(sample), 0, 0);

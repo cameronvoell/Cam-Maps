@@ -27,11 +27,15 @@ public class Monster {
 			{
 			foundStatus = "1";	
 			}
-			return foundStatus + "-" + name + ": " + description;
+			return foundStatus + "-" + name + ": " + description + " (" + latitude + "," + longitude + ")" + caught;
 		}
 		public void iterateCaught()
 		{
 			caught++;
+		}
+		public int getNumCaught()
+		{
+			return caught;
 		}
 		public void setFound()
 		{

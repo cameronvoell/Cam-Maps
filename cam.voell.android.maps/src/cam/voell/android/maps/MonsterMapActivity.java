@@ -10,6 +10,8 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -43,7 +45,7 @@ public class MonsterMapActivity extends MapActivity {
 		mapController.animateTo(myLocation);
 		
 		//3) Create list of monsters
-		ArrayList<Monster> mapMonsters = initiateMonsters();
+		ArrayList<Monster> mapMonsters = initiateMonstersDB();
 		
 		//4) This list will be modified to control what overlays are displayed on the map
 		List mapOverlays = mapView.getOverlays();
@@ -73,7 +75,7 @@ public class MonsterMapActivity extends MapActivity {
 		//is changed, need to be called from this onLocationChanged method.
 		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-		    0, new GeoUpdateHandler(mapController,player,mapMonsters,mapOverlays,userPicOverlay));
+		    0, new GeoUpdateHandler( getBaseContext(), mapController,player,mapMonsters,mapOverlays,userPicOverlay));
 		
 	}
 	
@@ -82,7 +84,67 @@ public class MonsterMapActivity extends MapActivity {
 	    ArrayList monsters = new ArrayList();
 	    monsters.add(new Monster("Outside Lands Monster","You are near your home",(int) (37.7647* 1E6), (int) (-122.468* 1E6)));
 	    monsters.add(new Monster("CoitCreature", "You are near Megans",(int) (37.800027 * 1E6), (int) (-122.405537 * 1E6)));
-	    monsters.add(new Monster("YelpMonster", "You are near Yelp",(int) (37.785962* 1E6), (int) (-122.402576* 1E6)));  
+	    monsters.add(new Monster("YelpMonster", "You are near Yelp",(int)(39.362543 * 1E6), (int)(-120.242743 * 1E6)));//(int) (37.785962* 1E6), (int) (-122.402576* 1E6)));  
+	    return monsters;
+	}
+	
+	private ArrayList<Monster> initiateMonstersDB(){
+		MonsterReaderDbHelper mDbHelper = new MonsterReaderDbHelper(getBaseContext());
+		SQLiteDatabase db = mDbHelper.getReadableDatabase();
+		String[] projection = {
+				MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME,
+				MonsterReaderContract.MonsterEntry.COLUMN_NAME_DESCRIPTION,
+				MonsterReaderContract.MonsterEntry.COLUMN_NAME_LATITUDE,
+				MonsterReaderContract.MonsterEntry.COLUMN_NAME_LONGITUDE
+		};
+		String sortOrder = MonsterReaderContract.MonsterEntry._ID + " DESC";
+		
+		Cursor c = db.query(
+				MonsterReaderContract.MonsterEntry.TABLE_NAME,
+				projection,
+				null,
+				null,
+				null,
+				null,
+				sortOrder
+				);
+		c.moveToFirst();
+		
+		
+	    ArrayList<Monster> monsters = new ArrayList<Monster>();
+	   // monsters.add(new Monster("YelpMonster", "You are near Yelp",(int)(39.362543 * 1E6), (int)(-120.242743 * 1E6)));
+	    String name = c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME));
+	    String description = c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_DESCRIPTION));
+	    int lat = (int)Integer.parseInt(c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_LATITUDE)));
+	    int lng = (int)Integer.parseInt(c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_LONGITUDE)));
+	    monsters.add(new Monster(name, description, lat, lng));
+	    
+	    c.moveToNext();
+	    String name2 = c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME));
+	    String description2 = c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_DESCRIPTION));
+	    int lat2 = (int)Integer.parseInt(c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_LATITUDE)));
+	    int lng2 = (int)Integer.parseInt(c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_LONGITUDE)));
+	    monsters.add(new Monster(name2, description2, lat2, lng2));
+
+	    c.moveToNext();
+	    String name3 = c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME));
+	    String description3 = c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_DESCRIPTION));
+	    int lat3 = (int)Integer.parseInt(c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_LATITUDE)));
+	    int lng3 = (int)Integer.parseInt(c.getString(
+				c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_LONGITUDE)));
+	    monsters.add(new Monster(name3, description3, lat3, lng3));
+	   
 	    return monsters;
 	}
 	
