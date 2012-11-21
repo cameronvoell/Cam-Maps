@@ -3,24 +3,74 @@ package cam.voell.android.maps;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 
 public class MonsterListActivity extends Activity 
 {
+	private SimpleCursorAdapter ca;
+	private Cursor c;
+	public void onResume()
+	{
+		c.requery();
+		super.onResume();
+	}
 	protected void onCreate(Bundle bundle) 
 	{
+		//*****************************
+		//This is the Monster List View
+		//*****************************
 		super.onCreate(bundle);
 		setContentView(R.layout.listview);
-		
+	
+		//**********************************************************************************
+		//These values will be used for an ArrayAdapter technique of populating the ListView
+		//**********************************************************************************
 		ArrayList monsters = initiateMonstersDB();
         ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, monsters);
+        
+        //***********************************************************************************
+        //These values will be used for a CursorAdapter technique for populating the ListView
+        //***********************************************************************************
+        MonsterReaderDbHelper mDbHelper = new MonsterReaderDbHelper(getBaseContext());
+		SQLiteDatabase db = mDbHelper.getReadableDatabase();
+		String[] projection = {
+				MonsterReaderContract.MonsterEntry._ID,
+				MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME,
+				MonsterReaderContract.MonsterEntry.COLUMN_NAME_DESCRIPTION,
+				MonsterReaderContract.MonsterEntry.COLUMN_NAME_LATITUDE,
+				MonsterReaderContract.MonsterEntry.COLUMN_NAME_CAUGHT
+		};
+		String sortOrder = MonsterReaderContract.MonsterEntry.COLUMN_NAME_CAUGHT + " DESC";
+		
+		c = db.query(
+				MonsterReaderContract.MonsterEntry.TABLE_NAME,
+				projection,
+				null,
+				null,
+				null,
+				null,
+				sortOrder
+				);
+		c.moveToFirst();
+		String[] fromColumns = {MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME, MonsterReaderContract.MonsterEntry.COLUMN_NAME_CAUGHT};
+		int[] toViews = {R.id.monster_name,R.id.monster_found};
+        ca = new SimpleCursorAdapter(getBaseContext(), R.layout.monster_entry, c, fromColumns, toViews,1);
+      
+        //******************************
+        //Add the adaptor to my ListView
+        //******************************
         ListView listview = (ListView)findViewById(R.id.myList);
-        listview.setAdapter(adapter);
+        listview.setAdapter(ca);
 	}
 	
 	private ArrayList<Monster> initiateMonsters(){

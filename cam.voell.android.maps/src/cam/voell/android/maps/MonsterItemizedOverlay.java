@@ -9,8 +9,12 @@ import android.widget.Toast;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
 
+//*****************************************************************************
+//This class represents the object that will be overlayed on to the Monster Map
+//One important aspect of this class is that it contains the onTap method for 
+//when a user taps on the icon of an object on the map
+//*****************************************************************************
 public class MonsterItemizedOverlay extends ItemizedOverlay {
-
 	private ArrayList mOverlays = new ArrayList();
 	private Context context;
 
@@ -45,6 +49,7 @@ public class MonsterItemizedOverlay extends ItemizedOverlay {
 
 	@Override
 	protected boolean onTap(int i) {
+		
 		OverlayItem overlayItem = (OverlayItem) mOverlays.get(i);
 		Toast.makeText(context, overlayItem.getSnippet(), Toast.LENGTH_SHORT).show();
 		return true;

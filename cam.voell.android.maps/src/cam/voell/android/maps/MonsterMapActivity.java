@@ -9,18 +9,29 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.widget.SimpleCursorAdapter;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
 
 
 public class MonsterMapActivity extends MapActivity {
 
 	private static final int MY_LATITUDE = (int) (37.7650029 * 1E6);
 	private static final int MY_LONGITUDE = (int) (-122.4658212 * 1E6);
+	private ArrayList<Monster> mapMonsters;
+	private Player player;
 
 	@Override
 	protected boolean isRouteDisplayed() {
@@ -34,18 +45,23 @@ public class MonsterMapActivity extends MapActivity {
 
 		//1) Create a map view
 		MapView mapView = (MapView) findViewById(R.id.mapview);
-		mapView.setBuiltInZoomControls(true);
+		//mapView.getZoomButtonsController().setVisible(false);
+		mapView.setBuiltInZoomControls(false);
 		mapView.setStreetView(true);
 		MapController mapController = mapView.getController();
 		mapController.setZoom(18); // Zoom 1 is world view
+		
+		Button capture = (Button) findViewById(R.id.button);
+		
+		
 
 		//2) Create player and center the map on the player
-		Player player = new Player("Cameron", "I'm cool", MY_LATITUDE,MY_LONGITUDE,this.getResources().getDrawable(R.drawable.t_m_n_squirtle));
+		player = new Player("Cameron", "I'm cool", MY_LATITUDE,MY_LONGITUDE,this.getResources().getDrawable(R.drawable.t_m_n_squirtle));
 		GeoPoint myLocation = new GeoPoint(MY_LATITUDE, MY_LONGITUDE);
 		mapController.animateTo(myLocation);
 		
 		//3) Create list of monsters
-		ArrayList<Monster> mapMonsters = initiateMonstersDB();
+		mapMonsters = initiateMonstersDB();
 		
 		//4) This list will be modified to control what overlays are displayed on the map
 		List mapOverlays = mapView.getOverlays();
@@ -79,14 +95,46 @@ public class MonsterMapActivity extends MapActivity {
 		
 	}
 	
-	//This method initiated the monsters on the map.
-	private ArrayList<Monster> initiateMonsters(){
-	    ArrayList monsters = new ArrayList();
-	    monsters.add(new Monster("Outside Lands Monster","You are near your home",(int) (37.7647* 1E6), (int) (-122.468* 1E6)));
-	    monsters.add(new Monster("CoitCreature", "You are near Megans",(int) (37.800027 * 1E6), (int) (-122.405537 * 1E6)));
-	    monsters.add(new Monster("YelpMonster", "You are near Yelp",(int)(39.362543 * 1E6), (int)(-120.242743 * 1E6)));//(int) (37.785962* 1E6), (int) (-122.402576* 1E6)));  
-	    return monsters;
+	public void captureAttempt(View v)
+	{
+		Monster closeBy = playerNearMonster();
+		int threshold = 30;
+		float dist = player.distanceTo(closeBy.getLatitude(),closeBy.getLongitude());
+		if (dist < threshold)
+		{
+			Toast.makeText(getBaseContext(), "You caught " + closeBy.getName()+ "!", Toast.LENGTH_SHORT).show();
+			MonsterReaderDbHelper mDbHelper = new MonsterReaderDbHelper(getBaseContext());
+			SQLiteDatabase db = mDbHelper.getWritableDatabase();
+			
+			String[] projection = {MonsterReaderContract.MonsterEntry.COLUMN_NAME_CAUGHT};
+			String selection1 = MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME + " LIKE ?";
+			String[] selectionArgs1 = { closeBy.getName() };
+			Cursor c = db.query(
+					MonsterReaderContract.MonsterEntry.TABLE_NAME,projection,selection1,selectionArgs1,null,null,null);
+			// New value for one column
+			c.moveToFirst();
+			int currentCaught = (int)Integer.valueOf(c.getString(c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_CAUGHT)));
+			ContentValues values = new ContentValues();
+			values.put(MonsterReaderContract.MonsterEntry.COLUMN_NAME_CAUGHT, currentCaught + 1);
+			closeBy.setCaught(currentCaught + 1);
+
+			// Which row to update, based on the ID
+			String selection = MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME + " LIKE ?";
+			String[] selectionArgs = { closeBy.getName() };
+
+			db.update(
+			    MonsterReaderContract.MonsterEntry.TABLE_NAME,
+			    values,
+			    selection,
+			    selectionArgs);
+			db.close();
+			
+		}else {
+			int diff = (int) (dist - threshold);
+			Toast.makeText(getBaseContext(), "You need to get "+ diff + " meters closer to " + closeBy.getName(), Toast.LENGTH_SHORT).show();
+		}
 	}
+
 	
 	private ArrayList<Monster> initiateMonstersDB(){
 		MonsterReaderDbHelper mDbHelper = new MonsterReaderDbHelper(getBaseContext());
@@ -147,5 +195,37 @@ public class MonsterMapActivity extends MapActivity {
 	   
 	    return monsters;
 	}
+	
+	private Monster playerNearMonster()
+	{
+		boolean foundAMonster = false;
+		float minDist = 99999999;
+		Monster close = mapMonsters.get(0);
+		for (Monster m: mapMonsters)
+		{
+			float dist = player.distanceTo(m.getLatitude(),m.getLongitude());
+			if (dist < minDist)
+			{
+				minDist = dist;
+				close = m;
+			}
+		}
+		return close;
+	}
+	
+	public static float distFrom(double d, double e, double f, double g) {
+	    double earthRadius = 3958.75;
+	    double dLat = Math.toRadians(f-d);
+	    double dLng = Math.toRadians(g-e);
+	    double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+	               Math.cos(Math.toRadians(d)) * Math.cos(Math.toRadians(f)) *
+	               Math.sin(dLng/2) * Math.sin(dLng/2);
+	    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	    double dist = earthRadius * c;
+
+	    int meterConversion = 1609;
+
+	    return new Float(dist * meterConversion).floatValue();
+}
 	
 }

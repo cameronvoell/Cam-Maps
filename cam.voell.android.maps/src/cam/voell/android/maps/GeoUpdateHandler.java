@@ -9,10 +9,12 @@ import com.google.android.maps.OverlayItem;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
 
 public class GeoUpdateHandler implements LocationListener {
 	
@@ -46,25 +48,35 @@ public class GeoUpdateHandler implements LocationListener {
 		Monster closeBy = playerNearMonster();
 		float dist = player.distanceTo(closeBy.getLatitude(),closeBy.getLongitude());
 		String message;
-		if (dist < 300)
+		if (dist < 30)
 		{
-			message = "You captured " + closeBy.getName() + "!";
+			message = "You are currently within range of a " + closeBy.getName() + "!";
+			/*
 			MonsterReaderDbHelper mDbHelper = new MonsterReaderDbHelper(context);
-			SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
+			SQLiteDatabase db = mDbHelper.getWritableDatabase();
+			
+			String[] projection = {MonsterReaderContract.MonsterEntry.COLUMN_NAME_CAUGHT};
+			String selection1 = MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME + " LIKE ?";
+			String[] selectionArgs1 = { closeBy.getName() };
+			Cursor c = db.query(
+					MonsterReaderContract.MonsterEntry.TABLE_NAME,projection,selection1,selectionArgs1,null,null,null);
 			// New value for one column
+			c.moveToFirst();
+			int currentCaught = (int)Integer.valueOf(c.getString(c.getColumnIndex(MonsterReaderContract.MonsterEntry.COLUMN_NAME_CAUGHT)));
 			ContentValues values = new ContentValues();
-			values.put(MonsterReaderContract.MonsterEntry.COLUMN_NAME_CAUGHT, String.valueOf(closeBy.getNumCaught() + 1));
+			values.put(MonsterReaderContract.MonsterEntry.COLUMN_NAME_CAUGHT, currentCaught + 1);
+			closeBy.setCaught(currentCaught + 1);
 
 			// Which row to update, based on the ID
 			String selection = MonsterReaderContract.MonsterEntry.COLUMN_NAME_MONSTER_NAME + " LIKE ?";
 			String[] selectionArgs = { closeBy.getName() };
 
-			int count = db.update(
+			db.update(
 			    MonsterReaderContract.MonsterEntry.TABLE_NAME,
 			    values,
 			    selection,
 			    selectionArgs);
+			db.close();*/
 		}
 		else
 		{
@@ -112,7 +124,7 @@ public class GeoUpdateHandler implements LocationListener {
 	    int meterConversion = 1609;
 
 	    return new Float(dist * meterConversion).floatValue();
-}
+	}
 
 
 	@Override

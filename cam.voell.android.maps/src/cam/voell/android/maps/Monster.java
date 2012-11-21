@@ -29,9 +29,9 @@ public class Monster {
 			}
 			return foundStatus + "-" + name + ": " + description + " (" + latitude + "," + longitude + ")" + caught;
 		}
-		public void iterateCaught()
+		public void setCaught(int c)
 		{
-			caught++;
+			caught = c;
 		}
 		public int getNumCaught()
 		{
